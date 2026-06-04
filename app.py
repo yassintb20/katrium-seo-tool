@@ -135,18 +135,20 @@ def load_gsc_data(queries_bytes, pages_bytes):
             col_map_p[c] = 'Position'
     pages_df = pages_df.rename(columns=col_map_p)
 
-    # Nettoyage
+    # Nettoyage — gestion des formats GSC (virgules, espaces, %)
     for col in ['Clicks', 'Impressions', 'Position']:
         if col in queries_df.columns:
+            queries_df[col] = queries_df[col].astype(str).str.replace(',', '').str.replace(' ', '').str.replace('%', '')
             queries_df[col] = pd.to_numeric(queries_df[col], errors='coerce').fillna(0)
         if col in pages_df.columns:
+            pages_df[col] = pages_df[col].astype(str).str.replace(',', '').str.replace(' ', '').str.replace('%', '')
             pages_df[col] = pd.to_numeric(pages_df[col], errors='coerce').fillna(0)
 
     return queries_df, pages_df
 
 queries_df, pages_df = load_gsc_data(
-    queries_file.read(),
-    pages_file.read()
+    queries_file.getvalue(),
+    pages_file.getvalue()
 )
 
 st.success(f"✅ Données chargées — {len(queries_df):,} requêtes · {len(pages_df):,} pages")
